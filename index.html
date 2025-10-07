@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="id">
-  <head>
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>MSO Cost Calculator</title>
@@ -9,448 +9,600 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
     <style>
-      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap");
+        @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap");
 
-      * {
-        font-family: "Inter", sans-serif;
-      }
-
-      body {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        min-height: 100vh;
-      }
-
-      .glass-card {
-        background: rgba(255, 255, 255, 0.95);
-        border: 1px solid rgba(255, 255, 255, 0.3);
-      }
-
-      .gradient-text {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-      }
-
-      .gradient-bg {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      }
-
-      .hover-lift {
-        transition: transform 0.2s ease;
-        will-change: transform;
-      }
-
-      .hover-lift:hover {
-        transform: translateY(-2px) translateZ(0);
-      }
-
-      input,
-      select {
-        transition: border-color 0.2s ease, box-shadow 0.2s ease;
-      }
-
-      input:focus,
-      select:focus {
-        outline: none;
-        border-color: #667eea;
-        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-      }
-
-      input.error {
-        border-color: #ef4444;
-        box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
-      }
-
-      .animated-number {
-        transition: opacity 0.3s ease;
-      }
-
-      .stat-card {
-        background: linear-gradient(
-          135deg,
-          rgba(102, 126, 234, 0.1) 0%,
-          rgba(118, 75, 162, 0.1) 100%
-        );
-        border-left: 4px solid #667eea;
-      }
-
-      .tab-button {
-        position: relative;
-        padding: 1rem 1.5rem;
-        color: rgba(255, 255, 255, 0.6);
-        font-weight: 600;
-        transition: color 0.2s ease, transform 0.2s ease;
-        border-radius: 12px 12px 0 0;
-        margin: 0 4px;
-        overflow: hidden;
-        cursor: pointer;
-        background: transparent;
-        border: none;
-        font-size: 0.9rem;
-        will-change: transform;
-      }
-
-      .tab-button::before {
-        content: "";
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        height: 3px;
-        background: white;
-        transform: scaleX(0);
-        transition: transform 0.3s ease;
-      }
-
-      .tab-button::after {
-        content: "";
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(255, 255, 255, 0.05);
-        opacity: 0;
-        transition: opacity 0.2s ease;
-        z-index: -1;
-      }
-
-      .tab-button:hover {
-        color: rgba(255, 255, 255, 0.95);
-        transform: translateY(-2px) translateZ(0);
-      }
-
-      .tab-button:hover::after {
-        opacity: 1;
-      }
-
-      .tab-button.active {
-        color: white;
-        background: rgba(255, 255, 255, 0.15);
-      }
-
-      .tab-button.active::before {
-        transform: scaleX(1);
-      }
-
-      .tab-icon {
-        display: inline-block;
-        font-size: 1.25rem;
-        margin-right: 0.5rem;
-        transition: transform 0.2s ease;
-      }
-
-      .tab-button:hover .tab-icon {
-        transform: scale(1.1) translateZ(0);
-      }
-
-      .tab-button.active .tab-icon {
-        transform: scale(1.15) translateZ(0);
-      }
-
-      .tab-content {
-        display: none;
-        animation: fadeIn 0.2s ease;
-      }
-
-      .tab-content.active {
-        display: block;
-      }
-
-      @keyframes fadeIn {
-        from {
-          opacity: 0;
+        * {
+            font-family: "Inter", sans-serif;
         }
-        to {
-          opacity: 1;
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            transition: background 0.3s ease;
+            animation: gradient 15s ease infinite;
         }
-      }
 
-      .tooltip {
-        position: relative;
-        display: inline-block;
-        cursor: help;
-      }
-
-      .tooltip .tooltiptext {
-        visibility: hidden;
-        width: 200px;
-        background-color: #1f2937;
-        color: #fff;
-        text-align: left;
-        border-radius: 8px;
-        padding: 8px 12px;
-        position: absolute;
-        z-index: 1;
-        bottom: 125%;
-        left: 50%;
-        margin-left: -100px;
-        opacity: 0;
-        transition: opacity 0.2s ease;
-        font-size: 0.75rem;
-        line-height: 1.4;
-        pointer-events: none;
-      }
-
-      .tooltip .tooltiptext::after {
-        content: "";
-        position: absolute;
-        top: 100%;
-        left: 50%;
-        margin-left: -5px;
-        border-width: 5px;
-        border-style: solid;
-        border-color: #1f2937 transparent transparent transparent;
-      }
-
-      .tooltip:hover .tooltiptext {
-        visibility: visible;
-        opacity: 1;
-      }
-
-      .error-message {
-        color: #ef4444;
-        font-size: 0.75rem;
-        margin-top: 0.25rem;
-        display: none;
-      }
-
-      .error-message.show {
-        display: block;
-      }
-
-      .loading-spinner {
-        display: inline-block;
-        width: 16px;
-        height: 16px;
-        border: 2px solid rgba(255, 255, 255, 0.3);
-        border-radius: 50%;
-        border-top-color: white;
-        animation: spin 0.6s linear infinite;
-        margin-right: 8px;
-      }
-
-      @keyframes spin {
-        to {
-          transform: rotate(360deg);
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            transition: background 0.3s ease, border 0.3s ease;
         }
-      }
 
-      .empty-state {
-        text-align: center;
-        padding: 4rem 2rem;
-      }
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
 
-      .empty-state-icon {
-        font-size: 4rem;
-        margin-bottom: 1rem;
-        opacity: 0.5;
-      }
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
 
-      .kbd {
-        display: inline-block;
-        padding: 0.25rem 0.5rem;
-        font-size: 0.75rem;
-        font-family: monospace;
-        background: rgba(255, 255, 255, 0.2);
-        border: 1px solid rgba(255, 255, 255, 0.3);
-        border-radius: 4px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        color: white;
-        font-weight: 600;
-      }
+        .hover-lift {
+            transition: transform 0.2s ease;
+            will-change: transform;
+        }
 
-      @media (max-width: 768px) {
+        .hover-lift:hover {
+            transform: translateY(-2px) translateZ(0);
+        }
+
+        input,
+        select {
+            transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.3s ease;
+        }
+
+        input:focus,
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        input.error {
+            border-color: #ef4444;
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+        }
+
+        .animated-number {
+            transition: opacity 0.3s ease;
+        }
+
+        .stat-card {
+            background: linear-gradient(
+                135deg,
+                rgba(102, 126, 234, 0.1) 0%,
+                rgba(118, 75, 162, 0.1) 100%
+            );
+            border-left: 4px solid #667eea;
+            transition: background 0.3s ease;
+        }
+
         .tab-button {
-          padding: 0.75rem 1rem;
-          font-size: 0.8rem;
+            position: relative;
+            padding: 1rem 1.5rem;
+            color: rgba(255, 255, 255, 0.6);
+            font-weight: 600;
+            transition: color 0.2s ease, transform 0.2s ease;
+            border-radius: 12px 12px 0 0;
+            margin: 0 4px;
+            overflow: hidden;
+            cursor: pointer;
+            background: transparent;
+            border: none;
+            font-size: 0.9rem;
+            will-change: transform;
         }
 
-        .tab-icon {
-          font-size: 1rem;
-          margin-right: 0.25rem;
-        }
-
-        .tab-label {
-          display: none;
+        .tab-button::before {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: white;
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
         }
 
         .tab-button::after {
-          content: attr(data-label);
-          display: block;
-          font-size: 0.65rem;
-          margin-top: 0.125rem;
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.05);
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            z-index: -1;
         }
-      }
 
-      .success-toast {
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        background: #10b981;
-        color: white;
-        padding: 1rem 1.5rem;
-        border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        display: none;
-        z-index: 1000;
-        animation: slideIn 0.3s ease;
-      }
-
-      .success-toast.show {
-        display: block;
-      }
-
-      @keyframes slideIn {
-        from {
-          transform: translateX(400px);
-          opacity: 0;
+        .tab-button:hover {
+            color: rgba(255, 255, 255, 0.95);
+            transform: translateY(-2px) translateZ(0);
         }
-        to {
-          transform: translateX(0);
-          opacity: 1;
+
+        .tab-button:hover::after {
+            opacity: 1;
         }
-      }
 
-      /* Help Modal */
-      .modal {
-        display: none;
-        position: fixed;
-        z-index: 1000;
-        left: 0;
-        top: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.5);
-        border-radius: 16px;
-        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-        backdrop-filter: blur(10.5px);
-        -webkit-backdrop-filter: blur(10.5px);
-        border: 1px solid rgba(255, 255, 255, 0.3);
-        animation: fadeInModal 0.2s ease;
-      }
-
-      .modal.show {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-
-.modal-content {
-    background: white;
-    border-radius: 1.5rem;
-    padding: 2rem 2rem 2rem 2rem; /* Padding untuk ruang scroll bar */
-    max-width: 600px;
-    width: 90%;
-    max-height: 80vh;
-    overflow-y: auto; /* Memungkinkan scroll */
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-    animation: slideUp 0.2s ease;
-    transform: translateZ(0);
-}
-
-/* Scrollbar styling */
-.modal-content::-webkit-scrollbar {
-    width: 8px; /* Atur lebar scroll bar */
-}
-
-.modal-content::-webkit-scrollbar-thumb {
-    background-color: rgba(0, 0, 0, 0.5); /* Warna scroll bar */
-    border-radius: 10px; /* Sudut halus */
-}
-
-.modal-content {
-    scrollbar-width: thin; /* Untuk Firefox */
-    scrollbar-color: rgba(0, 0, 0, 0.5) transparent; /* Warna scroll bar */
-}
-
-/* CSS khusus untuk Edge */
-@supports (-ms-ime-align: auto) {
-    .modal-content {
-        padding-right: 10px; /* Tambahkan ruang untuk scroll bar */
-    }
-}
-
-
-      @keyframes fadeInModal {
-        from {
-          opacity: 0;
+        .tab-button.active {
+            color: white;
+            background: rgba(255, 255, 255, 0.15);
         }
-        to {
-          opacity: 1;
+
+        .tab-button.active::before {
+            transform: scaleX(1);
         }
-      }
 
-      @keyframes slideUp {
-        from {
-          transform: translateY(30px) translateZ(0);
-          opacity: 0;
+        .tab-icon {
+            display: inline-block;
+            font-size: 1.25rem;
+            margin-right: 0.5rem;
+            transition: transform 0.2s ease;
         }
-        to {
-          transform: translateY(0) translateZ(0);
-          opacity: 1;
+
+        .tab-button:hover .tab-icon {
+            transform: scale(1.1) translateZ(0);
         }
-      }
 
-      .modal-close {
-        float: right;
-        font-size: 1.5rem;
-        font-weight: bold;
-        color: #9ca3af;
-        cursor: pointer;
-        transition: color 0.2s ease;
-        line-height: 1;
-      }
+        .tab-button.active .tab-icon {
+            transform: scale(1.15) translateZ(0);
+        }
 
-      .modal-close:hover {
-        color: #374151;
-      }
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.2s ease;
+        }
 
-      .help-section {
-        margin-bottom: 1.5rem;
-      }
+        .tab-content.active {
+            display: block;
+        }
 
-      .help-section h3 {
-        font-size: 1.1rem;
-        font-weight: 700;
-        color: #667eea;
-        margin-bottom: 0.75rem;
-      }
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
 
-      .help-section p,
-      .help-section li {
-        color: #4b5563;
-        line-height: 1.6;
-        font-size: 0.9rem;
-      }
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            cursor: help;
+        }
 
-      .help-section ul {
-        list-style: none;
-        padding-left: 0;
-      }
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 200px;
+            background-color: #1f2937;
+            color: #fff;
+            text-align: left;
+            border-radius: 8px;
+            padding: 8px 12px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -100px;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            font-size: 0.75rem;
+            line-height: 1.4;
+            pointer-events: none;
+        }
 
-      .help-section li {
-        padding: 0.5rem 0;
-        border-bottom: 1px solid #f3f4f6;
-      }
+        .tooltip .tooltiptext::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: #1f2937 transparent transparent transparent;
+        }
 
-      .help-section li:last-child {
-        border-bottom: none;
-      }
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
 
-      .help-section li strong {
-        color: #1f2937;
-      }
+        .error-message {
+            color: #ef4444;
+            font-size: 0.75rem;
+            margin-top: 0.25rem;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 0.6s linear infinite;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .kbd {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            font-size: 0.75rem;
+            font-family: monospace;
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            color: white;
+            font-weight: 600;
+        }
+
+        @media (max-width: 768px) {
+            .tab-button {
+                padding: 0.75rem 1rem;
+                font-size: 0.8rem;
+            }
+
+            .tab-icon {
+                font-size: 1rem;
+                margin-right: 0.25rem;
+            }
+
+            .tab-label {
+                display: none;
+            }
+        }
+
+        .success-toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #10b981;
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            display: none;
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
+        }
+
+        .success-toast.show {
+            display: block;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10.5px);
+            -webkit-backdrop-filter: blur(10.5px);
+            animation: fadeInModal 0.2s ease;
+        }
+
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 1.5rem;
+            padding: 2rem;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            animation: slideUp 0.2s ease;
+            transform: translateZ(0);
+        }
+
+        .modal-content::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .modal-content::-webkit-scrollbar-thumb {
+            background-color: rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+        }
+
+        .modal-content {
+            scrollbar-width: thin;
+            scrollbar-color: rgba(0, 0, 0, 0.5) transparent;
+        }
+
+        @keyframes fadeInModal {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(30px) translateZ(0);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0) translateZ(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-close {
+            float: right;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #9ca3af;
+            cursor: pointer;
+            transition: color 0.2s ease;
+            line-height: 1;
+        }
+
+        .modal-close:hover {
+            color: #374151;
+        }
+
+        .help-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .help-section h3 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 0.75rem;
+        }
+
+        .help-section p,
+        .help-section li {
+            color: #4b5563;
+            line-height: 1.6;
+            font-size: 0.9rem;
+        }
+
+        .help-section ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .help-section li {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        .help-section li:last-child {
+            border-bottom: none;
+        }
+
+        .help-section li strong {
+            color: #1f2937;
+        }
+
+        /* Dark Mode Styles */
+        body.dark-mode {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        }
+
+        body.dark-mode .glass-card {
+            background: rgba(30, 30, 46, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        body.dark-mode .modal-content {
+            background: #1e1e2e;
+            color: #e0e0e0;
+        }
+
+        body.dark-mode .help-section h3 {
+            color: #a78bfa;
+        }
+
+        body.dark-mode .help-section p,
+        body.dark-mode .help-section li {
+            color: #d1d5db;
+        }
+
+        body.dark-mode input,
+        body.dark-mode select {
+            background: rgba(255, 255, 255, 0.05);
+            color: #e0e0e0;
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        body.dark-mode .stat-card {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.2) 0%, rgba(118, 75, 162, 0.2) 100%);
+        }
+
+        body.dark-mode table tbody tr {
+            color: #d1d5db;
+        }
+
+        body.dark-mode table tbody td {
+            color: #d1d5db;
+        }
+
+        body.dark-mode .bg-blue-50 {
+            background: rgba(59, 130, 246, 0.2) !important;
+        }
+
+        body.dark-mode .text-gray-900 {
+            color: #e0e0e0 !important;
+        }
+
+        body.dark-mode .text-gray-700 {
+            color: #d1d5db !important;
+        }
+
+        body.dark-mode .text-gray-800 {
+            color: #e0e0e0 !important;
+        }
+
+        body.dark-mode .text-gray-600 {
+            color: #9ca3af !important;
+        }
+
+        body.dark-mode .border-gray-100,
+        body.dark-mode .divide-gray-100 > * {
+            border-color: rgba(255, 255, 255, 0.1) !important;
+        }
+
+        body.dark-mode .hover\:bg-purple-50:hover {
+            background: rgba(139, 92, 246, 0.1) !important;
+        }
+
+        body.dark-mode .bg-purple-50 {
+            background: rgba(139, 92, 246, 0.1) !important;
+        }
+
+        body.dark-mode .border-gray-200 {
+            border-color: rgba(255, 255, 255, 0.2) !important;
+        }
+
+        /* Dark Mode Toggle Button */
+        .dark-mode-toggle {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            z-index: 999;
+        }
+
+        .dark-mode-toggle:hover {
+            transform: scale(1.1) translateZ(0);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+        }
+
+        .dark-mode-toggle:active {
+            transform: scale(0.95) translateZ(0);
+        }
+
+        /* Search Box Styles */
+        .search-box {
+            position: relative;
+            margin-bottom: 1rem;
+        }
+
+        .search-box input {
+            padding-left: 2.5rem;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9ca3af;
+            pointer-events: none;
+        }
+
+        body.dark-mode .search-icon {
+            color: #6b7280;
+        }
+
+        /* Highlight search results */
+        .highlight {
+            background-color: #fef3c7;
+            font-weight: 600;
+        }
+
+        body.dark-mode .highlight {
+            background-color: #92400e;
+            color: #fef3c7;
+        }
+
+        /* Scroll to top button */
+        .scroll-top-btn {
+            position: fixed;
+            bottom: 90px;
+            right: 20px;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: rgba(102, 126, 234, 0.9);
+            border: none;
+            color: white;
+            font-size: 1.25rem;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            z-index: 998;
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .scroll-top-btn.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .scroll-top-btn:hover {
+            background: rgba(102, 126, 234, 1);
+            transform: translateY(-4px) translateZ(0);
+        }
     </style>
-  </head>
-  <body class="p-4 md:p-8">
-    <!-- Success Toast -->
+</head>
+<body class="p-4 md:p-8">
+    <!-- Dark Mode Toggle Button -->
+    <button class="dark-mode-toggle" onclick="toggleDarkMode()" aria-label="Toggle Dark Mode" title="Toggle Dark/Light Mode">
+      <span id="darkModeIcon">🌙</span>
+    </button>
+
+    <!-- Scroll to Top Button -->
+    <button class="scroll-top-btn" id="scrollTopBtn" onclick="scrollToTop()" aria-label="Scroll to Top" title="Back to Top">
+      ↑
+    </button>
+
     <div id="successToast" class="success-toast">
       <span id="toastMessage">✓ File berhasil diexport!</span>
     </div>
 
-    <!-- Help Modal -->
     <div id="helpModal" class="modal">
       <div class="modal-content">
         <span class="modal-close" onclick="closeHelpModal()">&times;</span>
@@ -505,6 +657,12 @@
               <strong>Validasi:</strong> Jumlah orang minimal 1, sistem akan
               otomatis koreksi jika input tidak valid
             </li>
+            <li>
+              <strong>Dark Mode:</strong> Klik tombol 🌙 di kanan bawah untuk mode gelap
+            </li>
+            <li>
+              <strong>Search:</strong> Gunakan kotak pencarian untuk filter tabel benefit
+            </li>
           </ul>
         </div>
 
@@ -542,7 +700,6 @@
     </div>
 
     <div class="max-w-7xl mx-auto">
-      <!-- Header -->
       <div class="text-center mb-8">
         <h1 class="text-4xl md:text-6xl font-bold text-white mb-4">
           💼 MSO Cost Calculator
@@ -552,11 +709,11 @@
         </p>
         <p class="text-white/60 text-xs md:text-sm mt-2">
           <span class="kbd">Tab</span> untuk navigasi •
-          <span class="kbd">?</span> untuk bantuan
+          <span class="kbd">?</span> untuk bantuan •
+          <span class="kbd">🌙</span> dark mode
         </p>
       </div>
 
-      <!-- Tab Navigation -->
       <div class="glass-card rounded-t-3xl overflow-hidden shadow-2xl mb-0">
         <div
           class="flex bg-gradient-to-r from-purple-600/40 via-indigo-600/40 to-purple-600/40 px-2 md:px-4 pt-4 overflow-x-auto"
@@ -581,16 +738,12 @@
             <span class="tab-icon" aria-hidden="true">💻</span>
             <span class="tab-label">Device Only</span>
           </button>
-          
         </div>
       </div>
 
-      <!-- Tab Contents -->
       <div class="glass-card rounded-b-3xl shadow-2xl">
-        <!-- MANPOWER TAB -->
         <div id="manpower-tab" class="tab-content active p-4 md:p-8">
           <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <!-- Input Section -->
             <div class="lg:col-span-1">
               <div
                 class="glass-card rounded-2xl p-4 md:p-6 shadow-lg hover-lift"
@@ -680,7 +833,7 @@
                     <input
                       type="checkbox"
                       id="asuransi"
-                      class="w-6 h-6 text-purple-600 rounded focus:ring-purple-500"
+                      class="w-6 h-6 text-purple-600 rounded focus:ring-purple-500" checked
                     />
                     <label for="asuransi" class="text-gray-800 font-semibold">
                       Dengan Asuransi
@@ -694,10 +847,9 @@
                     </label>
                   </div>
 
-                  <!-- Gaji Pokok Display -->
                   <div class="stat-card p-4 rounded-xl">
                     <p class="text-sm font-medium text-gray-600 mb-1">
-                      Gaji Pokok per Bulan
+                      Gaji Pokok /Bulan /Orang
                     </p>
                     <p
                       id="gajiInfo"
@@ -710,25 +862,19 @@
               </div>
             </div>
 
-            <!-- Output Section -->
             <div class="lg:col-span-2">
-              <div
-                class="glass-card rounded-2xl p-4 md:p-6 shadow-lg hover-lift"
-              >
+              <div class="glass-card rounded-2xl p-4 md:p-6 shadow-lg hover-lift">
                 <h2 class="text-xl md:text-2xl font-bold gradient-text mb-6">
                   Ringkasan Biaya
                 </h2>
 
-                <!-- Cost Breakdown Cards -->
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
                   <div class="stat-card p-4 md:p-5 rounded-xl hover-lift">
                     <div class="flex items-center justify-between mb-2">
                       <p class="text-xs md:text-sm font-semibold text-gray-600">
                         Manpower
                       </p>
-                      <span class="text-xl md:text-2xl" aria-hidden="true"
-                        >👥</span
-                      >
+                      <span class="text-xl md:text-2xl" aria-hidden="true">👥</span>
                     </div>
                     <p
                       id="manpowerCost"
@@ -743,9 +889,7 @@
                       <p class="text-xs md:text-sm font-semibold text-gray-600">
                         Operasional
                       </p>
-                      <span class="text-xl md:text-2xl" aria-hidden="true"
-                        >⚙️</span
-                      >
+                      <span class="text-xl md:text-2xl" aria-hidden="true">⚙️</span>
                     </div>
                     <p
                       id="operationalCost"
@@ -760,9 +904,7 @@
                       <p class="text-xs md:text-sm font-semibold text-gray-600">
                         Tools
                       </p>
-                      <span class="text-xl md:text-2xl" aria-hidden="true"
-                        >🛠️</span
-                      >
+                      <span class="text-xl md:text-2xl" aria-hidden="true">🛠️</span>
                     </div>
                     <p
                       id="toolsCost"
@@ -773,55 +915,44 @@
                   </div>
                 </div>
 
-                <!-- Detailed Table -->
-                <div
-                  class="overflow-x-auto mb-6 rounded-xl border-2 border-gray-100"
-                >
+                <div class="overflow-x-auto mb-6 rounded-xl border-2 border-gray-100">
                   <table class="w-full">
                     <thead>
                       <tr class="gradient-bg text-white">
-                        <th
-                          class="px-4 md:px-6 py-3 md:py-4 text-left text-sm md:text-base font-semibold"
-                        >
+                        <th class="px-4 md:px-6 py-3 md:py-4 text-left text-sm md:text-base font-semibold">
                           Komponen
                         </th>
-                        <th
-                          class="px-4 md:px-6 py-3 md:py-4 text-right text-sm md:text-base font-semibold"
-                        >
+                        <th class="px-4 md:px-6 py-3 md:py-4 text-right text-sm md:text-base font-semibold">
                           Total
                         </th>
                       </tr>
                     </thead>
-                    <tbody
-                      id="outputTable"
-                      class="divide-y divide-gray-100"
-                    ></tbody>
+                    <tbody id="outputTable" class="divide-y divide-gray-100"></tbody>
                   </table>
                 </div>
 
-                <!-- Grand Total -->
                 <div class="gradient-bg rounded-2xl p-4 md:p-6 text-white">
                   <div class="flex items-center justify-between">
                     <div>
                       <p class="text-xs md:text-sm font-medium opacity-90 mb-1">
                         Total Biaya Proyek
                       </p>
-                      <p
-                        id="grandTotal"
-                        class="text-2xl md:text-4xl font-bold animated-number"
-                      >
+                      <p id="grandTotal" class="text-2xl md:text-4xl font-bold animated-number">
                         Rp 0
                       </p>
                     </div>
-                    <div class="text-4xl md:text-6xl" aria-hidden="true">
-                      💰
-                    </div>
+                    <div class="text-4xl md:text-6xl" aria-hidden="true">💰</div>
                   </div>
                 </div>
 
-                <!-- Export Buttons -->
                 <div class="mt-6 flex flex-col sm:flex-row gap-4">
-                  
+                  <!-- <button
+                    onclick="exportManpowerExcel()"
+                    id="btnExportExcel"
+                    class="flex-1 bg-green-600 hover:bg-green-700 text-white px-6 md:px-8 py-3 md:py-4 rounded-xl shadow-lg font-semibold hover-lift transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <span class="export-text">📊 Export Excel</span>
+                  </button> -->
                   <button
                     onclick="exportManpowerPDF()"
                     id="btnExportPDF"
@@ -830,628 +961,165 @@
                     <span class="export-text">📄 Export PDF</span>
                   </button>
                 </div>
+                
+                <div class="glass-card rounded-2xl p-4 md:p-6 shadow-lg hover-lift mt-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-xl font-bold gradient-text">
+                            ⭐ Benefit dari Manage Service
+                        </h3>
+                        <button onclick="exportBenefitPDF()" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-semibold hover-lift transition-all">
+                            📄 Export PDF
+                        </button>
+                    </div>
+
+                    <!-- Search Box -->
+                    <div class="search-box mb-4">
+                        <span class="search-icon">🔍</span>
+                        <input 
+                            type="text" 
+                            id="benefitSearch" 
+                            placeholder="Cari feature... (misal: SLA, Support, Remote)" 
+                            class="w-full border-2 border-gray-200 rounded-xl p-3 text-gray-800 font-medium"
+                            oninput="searchBenefitTable()"
+                        />
+                    </div>
+
+                    <div class="overflow-x-auto mb-6 rounded-xl border-2 border-gray-100">
+                        <table class="w-full" id="benefitTable">
+                            <thead>
+                                <tr class="gradient-bg text-white">
+                                    <th class="px-4 py-3 text-left text-sm font-semibold">Feature</th>
+                                    <th class="px-4 py-3 text-left text-sm font-semibold">Managed Services</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100 text-sm">
+                                <!-- RINGKASAN & PRICING -->
+                                <tr class="bg-blue-50"><td colspan="2" class="px-4 py-2 font-bold text-gray-900 text-xs uppercase tracking-wide">Ringkasan & Pricing</td></tr>
+                                <tr class="hover:bg-purple-50 transition-colors"><td class="px-4 py-3 font-medium text-gray-900">Ideal For</td><td class="px-4 py-3 text-gray-700">Enterprises seeking a strategic partner to manage their entire IT operations for optimal performance and growth.</td></tr>
+                                <tr class="hover:bg-purple-50 transition-colors"><td class="px-4 py-3 font-medium text-gray-900">Pricing Model</td><td class="px-4 py-3 text-gray-700">Fully Customized</td></tr>
+                                
+                                <!-- SUPPORT & AVAILABILITY -->
+                                <tr class="bg-blue-50"><td colspan="2" class="px-4 py-2 font-bold text-gray-900 text-xs uppercase tracking-wide">Support & Availability</td></tr>
+                                <tr class="hover:bg-purple-50 transition-colors"><td class="px-4 py-3 font-medium text-gray-900">Incident Reporting Channels</td><td class="px-4 py-3 text-gray-700">Dedicated Team & Custom Channels</td></tr>
+                                <tr class="hover:bg-purple-50 transition-colors"><td class="px-4 py-3 font-medium text-gray-900">Incident Reporting Hours</td><td class="px-4 py-3 text-gray-700">Fully Customized (e.g., 24x7)</td></tr>
+                                
+                                <!-- SCOPE OF SUPPORT -->
+                                <tr class="bg-blue-50"><td colspan="2" class="px-4 py-2 font-bold text-gray-900 text-xs uppercase tracking-wide">Scope of Support</td></tr>
+                                <tr class="hover:bg-purple-50 transition-colors"><td class="px-4 py-3 font-medium text-gray-900">Covered Issues</td><td class="px-4 py-3 text-gray-700">Comprehensive Scope <span class="italic text-gray-600">(Hardware, OS, Apps, Infrastructure)</span></td></tr>
+                                <tr class="hover:bg-purple-50 transition-colors"><td class="px-4 py-3 font-medium text-gray-900">Vendor Case Management</td><td class="px-4 py-3 text-gray-700">Included & Fully Managed</td></tr>
+                                <tr class="hover:bg-purple-50 transition-colors"><td class="px-4 py-3 font-medium text-gray-900">Remote Support</td><td class="px-4 py-3 text-gray-700">Included & Proactive</td></tr>
+                                <tr class="hover:bg-purple-50 transition-colors"><td class="px-4 py-3 font-medium text-gray-900">On-site Support</td><td class="px-4 py-3 text-gray-700">Dedicated Resident Engineer(s)</td></tr>
+                                
+                                <!-- SERVICE MANAGEMENT -->
+                                <tr class="bg-blue-50"><td colspan="2" class="px-4 py-2 font-bold text-gray-900 text-xs uppercase tracking-wide">Service Management</td></tr>
+                                <tr class="hover:bg-purple-50 transition-colors"><td class="px-4 py-3 font-medium text-gray-900">Incident Monitoring & Follow-up</td><td class="px-4 py-3 text-gray-700">Proactive & Predictive Management</td></tr>
+                                <tr class="hover:bg-purple-50 transition-colors"><td class="px-4 py-3 font-medium text-gray-900">Reporting</td><td class="px-4 py-3 text-gray-700">Business Review & Strategic Roadmap</td></tr>
+                                
+                                <!-- SERVICE LEVEL AGREEMENT (SLA) -->
+                                <tr class="bg-blue-50"><td colspan="2" class="px-4 py-2 font-bold text-gray-900 text-xs uppercase tracking-wide">Service Level Agreement (SLA)</td></tr>
+                                <tr class="hover:bg-purple-50 transition-colors"><td class="px-4 py-3 font-medium text-gray-900">Initial Response Time</td><td class="px-4 py-3 text-gray-700">Bespoke SLA <span class="italic text-gray-600">(Tailored to Business Needs)</span></td></tr>
+                                <tr class="hover:bg-purple-50 transition-colors"><td class="px-4 py-3 font-medium text-gray-900">On-site Response Time</td><td class="px-4 py-3 text-gray-700">Immediate <span class="italic text-gray-600">(via Resident Engineer)</span></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <p id="noResultsMessage" class="text-center text-gray-500 hidden py-4">
+                        😕 Tidak ada hasil yang ditemukan
+                    </p>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- EQUIPMENT TAB -->
         <div id="equipment-tab" class="tab-content p-4 md:p-8">
-          <div class="empty-state">
-            <div class="empty-state-icon" aria-hidden="true">🛠️</div>
-            <h2 class="text-2xl md:text-3xl font-bold gradient-text mb-4">
-              Equipment Calculator
-            </h2>
-            <p class="text-gray-600 mb-6 max-w-md mx-auto">
-              Fitur ini sedang dalam pengembangan. Anda dapat menambahkan
-              perhitungan equipment/peralatan di sini.
-            </p>
-
-            <!-- Contoh Form Equipment -->
-            <div
-              class="max-w-2xl mx-auto glass-card rounded-2xl p-6 md:p-8 shadow-lg text-left"
-            >
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="glass-card rounded-2xl p-6 md:p-8 shadow-lg">
               <h3 class="text-lg md:text-xl font-bold mb-6 gradient-text">
-                Input Equipment
+                Parameter Input & Biaya
               </h3>
 
               <div class="space-y-4">
                 <div>
-                  <label class="block text-sm font-semibold text-gray-700 mb-2"
-                    >Jenis Services</label
-                  >
-                  <select
-                    class="w-full border-2 border-gray-200 rounded-xl p-3"
-                  
-                  >
-                    <option>Basic Service</option>
-                    <option>Pro-Service</option>
+                  <label class="block text-sm font-semibold text-gray-700 mb-2">Jenis Services</label>
+                  <select id="serviceType" class="w-full border-2 border-gray-200 rounded-xl p-3" onchange="calculateTotal()">
+                    <option value="basic">Basic Service</option>
+                    <option value="pro">Pro-Service</option>
                   </select>
                 </div>
 
                 <div>
-                  <label class="block text-sm font-semibold text-gray-700 mb-2"
-                    >Jumlah Unit</label
-                  >
-                  <input
-                    type="number"
-                    value="1"
-                    min="1"
-                    class="w-full border-2 border-gray-200 rounded-xl p-3"
-                    
-                  />
+                  <label class="block text-sm font-semibold text-gray-700 mb-2">Jumlah Unit</label>
+                  <input type="number" id="jumlahUnit" value="1" min="1" class="w-full border-2 border-gray-200 rounded-xl p-3" oninput="calculateTotal()" />
                 </div>
 
                 <div>
-                  <label class="block text-sm font-semibold text-gray-700 mb-2"
-                    >Harga per Unit</label
-                  >
-                  <input
-                    type="number"
-                    placeholder="Rp"
-                    class="w-full border-2 border-gray-200 rounded-xl p-3"
-                    
-                  />
+                  <label class="block text-sm font-semibold text-gray-700 mb-2">Cost /unit /bulan</label>
+                  <input type="text" id="hargaPerUnit" value="Rp. 0" class="w-full border-2 border-gray-200 rounded-xl p-3" disabled />
                 </div>
 
-                <button
-                  class="w-full gradient-bg text-white py-3 rounded-xl font-semibold opacity-50 cursor-not-allowed"
-                  
-                >
-                  Hitung Total
-                </button>
+                <div class="gradient-bg rounded-2xl p-4 md:p-6 text-white mt-8">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-xs md:text-sm font-medium opacity-90 mb-1">
+                                Total COGS Pertahun
+                            </p>
+                            <p id="totalBiaya" class="text-2xl md:text-4xl font-bold animated-number">
+                                Rp 0
+                            </p>
+                        </div>
+                        <div class="text-4xl md:text-6xl" aria-hidden="true">💻</div>
+                    </div>
+                </div>
               </div>
+            </div>
 
-              <div class="mt-6 p-4 bg-gray-50 rounded-xl">
-                <p class="text-sm text-gray-600 mb-1">Total Biaya Equipment</p>
-                <p class="text-xl md:text-2xl font-bold text-gray-400">Rp 0</p>
-              </div>
+            <div class="glass-card rounded-2xl p-6 md:p-8 shadow-lg">
+                <h3 class="text-lg md:text-xl font-bold gradient-text mb-6">
+                    ⭐ Basic Service vs Pro-Service
+                </h3>
+              
+                <div class="overflow-x-auto mb-6 rounded-xl border-2 border-gray-100">
+                    <table class="w-full">
+                        <thead>
+                            <tr class="gradient-bg text-white">
+                                <th class="px-4 py-3 text-left text-sm font-semibold">Feature</th>
+                                <th class="px-4 py-3 text-left text-sm font-semibold">Basic Service</th>
+                                <th class="px-4 py-3 text-left text-sm font-semibold">Pro-Service</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100 text-sm">
+                            <tr class="hover:bg-purple-50 transition-colors"><td class="px-4 py-3 font-medium text-gray-900">Ideal For</td><td class="px-4 py-3 text-gray-700">Hardware warranty coordination and vendor management.</td><td class="px-4 py-3 text-gray-700">Hands-on support for both hardware and OS to maximize user uptime.</td></tr>
+                            
+                            <tr class="hover:bg-purple-50 transition-colors"><td class="px-4 py-3 font-medium text-gray-900">Incident Channels</td><td class="px-4 py-3 text-gray-700">WA Group, Email</td><td class="px-4 py-3 text-gray-700">Helpdesk Portal, WA Group, Email</td></tr>
+                            <tr class="hover:bg-purple-50 transition-colors"><td class="px-4 py-3 font-medium text-gray-900">Reporting Hours</td><td class="px-4 py-3 text-gray-700">8x5 (Business Hours)</td><td class="px-4 py-3 text-gray-700">8x5, 24x7</td></tr>
+                            <tr class="hover:bg-purple-50 transition-colors"><td class="px-4 py-3 font-medium text-gray-900">Covered Issues</td><td class="px-4 py-3 text-gray-700">Hardware Only</td><td class="px-4 py-3 text-gray-700">Hardware & Operating System</td></tr>
+                            <tr class="hover:bg-purple-50 transition-colors"><td class="px-4 py-3 font-medium text-gray-900">Vendor Case Management</td><td class="px-4 py-3 text-gray-700">Included</td><td class="px-4 py-3 text-gray-700">Included</td></tr>
+                            <tr class="hover:bg-purple-50 transition-colors"><td class="px-4 py-3 font-medium text-gray-900">Remote Support</td><td class="px-4 py-3 text-gray-700">Not Included</td><td class="px-4 py-3 text-gray-700">Included (OS, 8x5)</td></tr>
+                            <tr class="hover:bg-purple-50 transition-colors"><td class="px-4 py-3 font-medium text-gray-900">On-site Support</td><td class="px-4 py-3 text-gray-700">By HW principal</td><td class="px-4 py-3 text-gray-700">Included (Jabodetabek, 8x5)</td></tr>
+                            <tr class="hover:bg-purple-50 transition-colors"><td class="px-4 py-3 font-medium text-gray-900">Incident Monitoring & Follow-up</td><td class="px-4 py-3 text-gray-700">Included</td><td class="px-4 py-3 text-gray-700">Included</td></tr>
+                            <tr class="hover:bg-purple-50 transition-colors"><td class="px-4 py-3 font-medium text-gray-900">Reporting</td><td class="px-4 py-3 text-gray-700">Monthly Performance Report</td><td class="px-4 py-3 text-gray-700">Monthly Performance Report</td></tr>
+                            <tr class="hover:bg-purple-50 transition-colors"><td class="px-4 py-3 font-medium text-gray-900">Initial Response Time</td><td class="px-4 py-3 text-gray-700">Max. 60 Minutes</td><td class="px-4 py-3 text-gray-700">Max. 30 Minutes</td></tr>
+                            <tr class="hover:bg-purple-50 transition-colors"><td class="px-4 py-3 font-medium text-gray-900">On-site Response Time</td><td class="px-4 py-3 text-gray-700">Not Applicable</td><td class="px-4 py-3 text-gray-700">Next Business Day (NBD)</td></tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
           </div>
         </div>
-
-        
+      </div>
     </div>
 
-    <script>
-      // Keyboard Navigation
-      document.addEventListener("keydown", function (e) {
-        // Arrow keys for tab navigation
-        const tabs = ["manpower", "equipment", "summary"];
-        const currentTab = document
-          .querySelector(".tab-button.active")
-          ?.getAttribute("data-tab");
-        const currentIndex = tabs.indexOf(currentTab);
-
-        if (e.key === "ArrowRight" && currentIndex < tabs.length - 1) {
-          switchTab(tabs[currentIndex + 1]);
-        } else if (e.key === "ArrowLeft" && currentIndex > 0) {
-          switchTab(tabs[currentIndex - 1]);
-        }
-
-        // ? key for help modal (Shift + / or direct ?)
-        if (
-          (e.key === "?" || (e.shiftKey && e.key === "/")) &&
-          !e.target.matches("input, textarea")
-        ) {
-          e.preventDefault();
-          openHelpModal();
-        }
-
-        // Escape key to close modal
-        if (e.key === "Escape") {
-          closeHelpModal();
-        }
-      });
-
-      // Help Modal Functions
-      function openHelpModal() {
-        document.getElementById("helpModal").classList.add("show");
-        document.body.style.overflow = "hidden";
-      }
-
-      function closeHelpModal() {
-        document.getElementById("helpModal").classList.remove("show");
-        document.body.style.overflow = "auto";
-      }
-
-      // Close modal when clicking outside
-      document
-        .getElementById("helpModal")
-        .addEventListener("click", function (e) {
-          if (e.target === this) {
-            closeHelpModal();
-          }
-        });
-
-      // Tab Switching
-      function switchTab(tabName) {
-        document.querySelectorAll(".tab-content").forEach((tab) => {
-          tab.classList.remove("active");
-        });
-
-        document.querySelectorAll(".tab-button").forEach((btn) => {
-          btn.classList.remove("active");
-        });
-
-        document.getElementById(tabName + "-tab").classList.add("active");
-
-        const activeButton = document.querySelector(`[data-tab="${tabName}"]`);
-        if (activeButton) {
-          activeButton.classList.add("active");
-        }
-
-        // Update summary if switching to summary tab
-        if (tabName === "summary") {
-          updateSummary();
-        }
-      }
-
-      // Update Summary Tab
-      function updateSummary() {
-        if (window.manpowerData) {
-          document.getElementById("summaryManpower").textContent = formatRupiah(
-            window.manpowerData.total
-          );
-          document.getElementById("summaryGrandTotal").textContent =
-            formatRupiah(window.manpowerData.total);
-        }
-      }
-
-      // Toast Notification
-      function showToast(message) {
-        const toast = document.getElementById("successToast");
-        document.getElementById("toastMessage").textContent = message;
-        toast.classList.add("show");
-        setTimeout(() => {
-          toast.classList.remove("show");
-        }, 3000);
-      }
-
-      // MANPOWER CALCULATOR CODE
-      const pengalamanSelect = document.getElementById("pengalaman");
-      const lamaKontrakSelect = document.getElementById("lamaKontrak");
-      const jumlahOrangInput = document.getElementById("jumlahOrang");
-      const asuransiCheckbox = document.getElementById("asuransi");
-      const gajiInfo = document.getElementById("gajiInfo");
-      const outputTable = document.getElementById("outputTable");
-      const grandTotalCell = document.getElementById("grandTotal");
-      const manpowerCostEl = document.getElementById("manpowerCost");
-      const operationalCostEl = document.getElementById("operationalCost");
-      const toolsCostEl = document.getElementById("toolsCost");
-
-      function formatRupiah(num) {
-        return "Rp " + num.toLocaleString("id-ID");
-      }
-
-      function getGajiPokok(pengalaman) {
-        if (pengalaman == 2) return 6500000;
-        if (pengalaman == 3) return 7000000;
-        if (pengalaman == 4) return 7500000;
-        return 0;
-      }
-
-      // Form Validation
-      function validateJumlahOrang() {
-        const value = parseInt(jumlahOrangInput.value);
-        const errorMsg = document.getElementById("jumlahOrangError");
-
-        if (value < 1 || isNaN(value)) {
-          jumlahOrangInput.classList.add("error");
-          errorMsg.classList.add("show");
-          return false;
-        } else {
-          jumlahOrangInput.classList.remove("error");
-          errorMsg.classList.remove("show");
-          return true;
-        }
-      }
-
-      jumlahOrangInput.addEventListener("blur", validateJumlahOrang);
-      jumlahOrangInput.addEventListener("input", function () {
-        if (this.value < 1) {
-          this.value = 1;
-        }
-        validateJumlahOrang();
-      });
-
-      function calculateManpower() {
-        if (!validateJumlahOrang()) {
-          return;
-        }
-
-        const pengalaman = parseInt(pengalamanSelect.value);
-        const lamaKontrak = parseInt(lamaKontrakSelect.value);
-        const jumlahOrang = parseInt(jumlahOrangInput.value);
-        const gajiPokok = getGajiPokok(pengalaman);
-        const withAsuransi = asuransiCheckbox.checked;
-
-        gajiInfo.textContent = formatRupiah(gajiPokok);
-
-        const perMonth = {
-          gp: gajiPokok,
-          asuransi: withAsuransi ? 400000 : 0,
-          tunjanganPerf: 350000,
-          tunjanganHp: 150000,
-          parkir: 150000,
-          bpjs: gajiPokok * 0.1024,
-        };
-        const perYear = { thr: gajiPokok, kompensasi: gajiPokok };
-
-        let manpowerCost = 0;
-        let manpowerDetails = [];
-
-        for (let year = 1; year <= lamaKontrak; year++) {
-          let factor = Math.pow(1.07, year - 1);
-          let gp = perMonth.gp * 12 * factor;
-          let asuransi = perMonth.asuransi * 12 * factor;
-          let perf = perMonth.tunjanganPerf * 12 * factor;
-          let hp = perMonth.tunjanganHp * 12 * factor;
-          let parkir = perMonth.parkir * 12 * factor;
-          let bpjs = perMonth.bpjs * 12 * factor;
-          let thr = perYear.thr * factor;
-          let komp = perYear.kompensasi * factor;
-
-          let yearlyTotal =
-            gp + asuransi + perf + hp + parkir + bpjs + thr + komp;
-          manpowerDetails.push({
-            year,
-            gp,
-            asuransi,
-            perf,
-            hp,
-            parkir,
-            bpjs,
-            thr,
-            komp,
-            total: yearlyTotal,
-          });
-          manpowerCost += yearlyTotal;
-        }
-
-        manpowerCost *= jumlahOrang;
-
-        let operasionalCost = (2000000 + 1500000 + 500000) * 12 * lamaKontrak;
-        let backupEngineer =
-          (perMonth.gp +
-            perMonth.asuransi +
-            perMonth.tunjanganPerf +
-            perMonth.tunjanganHp +
-            perMonth.parkir +
-            perMonth.bpjs) *
-          0.3 *
-          12 *
-          lamaKontrak;
-        operasionalCost += backupEngineer;
-
-        let toolsCost = 1500000 * jumlahOrang;
-        let total = manpowerCost + operasionalCost + toolsCost;
-
-        manpowerCostEl.textContent = formatRupiah(manpowerCost);
-        operationalCostEl.textContent = formatRupiah(operasionalCost);
-        toolsCostEl.textContent = formatRupiah(toolsCost);
-
-        outputTable.innerHTML = `
-        <tr class="hover:bg-purple-50 transition-colors">
-          <td class="px-4 md:px-6 py-3 md:py-4 font-medium text-gray-900 text-sm md:text-base">Biaya Manpower <span class="text-purple-600 font-semibold">(x ${jumlahOrang} orang)</span></td>
-          <td class="px-4 md:px-6 py-3 md:py-4 text-right font-semibold text-gray-900 text-sm md:text-base">${formatRupiah(
-            manpowerCost
-          )}</td>
-        </tr>
-        <tr class="hover:bg-purple-50 transition-colors">
-          <td class="px-4 md:px-6 py-3 md:py-4 font-medium text-gray-900 text-sm md:text-base">Biaya Operasional</td>
-          <td class="px-4 md:px-6 py-3 md:py-4 text-right font-semibold text-gray-900 text-sm md:text-base">${formatRupiah(
-            operasionalCost
-          )}</td>
-        </tr>
-        <tr class="hover:bg-purple-50 transition-colors">
-          <td class="px-4 md:px-6 py-3 md:py-4 font-medium text-gray-900 text-sm md:text-base">Biaya Tools <span class="text-purple-600 font-semibold">(x ${jumlahOrang} orang)</span></td>
-          <td class="px-4 md:px-6 py-3 md:py-4 text-right font-semibold text-gray-900 text-sm md:text-base">${formatRupiah(
-            toolsCost
-          )}</td>
-        </tr>
-      `;
-        grandTotalCell.textContent = formatRupiah(total);
-
-        window.manpowerData = {
-          pengalaman,
-          lamaKontrak,
-          jumlahOrang,
-          gajiPokok,
-          withAsuransi,
-          manpowerDetails,
-          manpowerCost,
-          operasionalCost,
-          toolsCost,
-          total,
-        };
-      }
-
-      pengalamanSelect.addEventListener("change", calculateManpower);
-      lamaKontrakSelect.addEventListener("change", calculateManpower);
-      jumlahOrangInput.addEventListener("input", calculateManpower);
-      asuransiCheckbox.addEventListener("change", calculateManpower);
-
-      calculateManpower();
-
-      function exportManpowerExcel() {
-        const btn = document.getElementById("btnExportExcel");
-        const originalText = btn.innerHTML;
-
-        // Show loading state
-        btn.disabled = true;
-        btn.innerHTML = '<span class="loading-spinner"></span> Exporting...';
-
-        setTimeout(() => {
-          const data = window.manpowerData;
-          const wb = XLSX.utils.book_new();
-
-          const ws_summary = XLSX.utils.aoa_to_sheet([
-            ["MSO Cost Calculator - Manpower Summary"],
-            [],
-            ["Parameter Input"],
-            ["Pengalaman Kerja", data.pengalaman + " Tahun"],
-            ["Lama Project", data.lamaKontrak + " Tahun"],
-            ["Jumlah Orang", data.jumlahOrang],
-            ["Gaji Pokok", data.gajiPokok],
-            ["Asuransi", data.withAsuransi ? "Ya" : "Tidak"],
-            [],
-            ["Ringkasan Biaya"],
-            ["Biaya Manpower", data.manpowerCost],
-            ["Biaya Operasional", data.operasionalCost],
-            ["Biaya Tools", data.toolsCost],
-            ["Grand Total", data.total],
-          ]);
-          XLSX.utils.book_append_sheet(wb, ws_summary, "Summary");
-
-          XLSX.writeFile(wb, "Manpower_Cost_Breakdown.xlsx");
-
-          // Reset button
-          btn.disabled = false;
-          btn.innerHTML = originalText;
-
-          // Show success toast
-          showToast("✓ File Excel berhasil diexport!");
-        }, 500);
-      }
-
-      async function exportManpowerPDF() {
-        const btn = document.getElementById("btnExportPDF");
-        const originalText = btn.innerHTML;
-
-        // Show loading state
-        btn.disabled = true;
-        btn.innerHTML =
-          '<span class="loading-spinner"></span> Generating PDF...';
-
-        setTimeout(async () => {
-          const { jsPDF } = window.jspdf;
-          const doc = new jsPDF();
-
-          const data = window.manpowerData;
-
-          // Gradient Header Background
-          doc.setFillColor(102, 126, 234);
-          doc.rect(0, 0, 210, 45, "F");
-
-          // Title
-          doc.setTextColor(255, 255, 255);
-          doc.setFontSize(24);
-          doc.setFont(undefined, "bold");
-          doc.text("MSO Cost Calculator", 105, 20, { align: "center" });
-
-          doc.setFontSize(11);
-          doc.setFont(undefined, "normal");
-          doc.text("Laporan Biaya Project - Manpower", 105, 30, {
-            align: "center",
-          });
-
-          // Reset text color
-          doc.setTextColor(0, 0, 0);
-
-          // Parameter Input Box
-          doc.setFillColor(248, 250, 252);
-          doc.roundedRect(14, 52, 182, 38, 3, 3, "F");
-
-          doc.setFontSize(12);
-          doc.setFont(undefined, "bold");
-          doc.text("Parameter Input", 20, 60);
-
-          doc.setFontSize(10);
-          doc.setFont(undefined, "normal");
-          doc.text(`Pengalaman Kerja: ${data.pengalaman} Tahun`, 20, 68);
-          doc.text(`Lama Project: ${data.lamaKontrak} Tahun`, 20, 75);
-          doc.text(`Jumlah Orang: ${data.jumlahOrang} orang`, 110, 68);
-          doc.text(
-            `Gaji Pokok: Rp ${data.gajiPokok.toLocaleString("id-ID")}`,
-            110,
-            75
-          );
-          doc.text(`Asuransi: ${data.withAsuransi ? "Ya" : "Tidak"}`, 110, 82);
-
-          // Cost Breakdown Cards
-          let startY = 100;
-
-          // Card 1: Manpower
-          doc.setFillColor(239, 237, 255);
-          doc.roundedRect(14, startY, 58, 25, 2, 2, "F");
-          doc.setDrawColor(102, 126, 234);
-          doc.setLineWidth(1);
-          doc.line(14, startY, 14, startY + 25);
-
-          doc.setFontSize(9);
-          doc.setTextColor(100, 100, 100);
-          doc.text("MANPOWER", 18, startY + 7);
-          doc.setFontSize(11);
-          doc.setFont(undefined, "bold");
-          doc.setTextColor(0, 0, 0);
-          doc.text(
-            "Rp " + (data.manpowerCost / 1000000).toFixed(1) + "jt",
-            18,
-            startY + 17
-          );
-
-          // Card 2: Operasional
-          doc.setFillColor(239, 237, 255);
-          doc.roundedRect(76, startY, 58, 25, 2, 2, "F");
-          doc.setDrawColor(102, 126, 234);
-          doc.line(76, startY, 76, startY + 25);
-
-          doc.setFontSize(9);
-          doc.setTextColor(100, 100, 100);
-          doc.text("OPERASIONAL", 80, startY + 7);
-          doc.setFontSize(11);
-          doc.setFont(undefined, "bold");
-          doc.setTextColor(0, 0, 0);
-          doc.text(
-            "Rp " + (data.operasionalCost / 1000000).toFixed(1) + "jt",
-            80,
-            startY + 17
-          );
-
-          // Card 3: Tools
-          doc.setFillColor(239, 237, 255);
-          doc.roundedRect(138, startY, 58, 25, 2, 2, "F");
-          doc.setDrawColor(102, 126, 234);
-          doc.line(138, startY, 138, startY + 25);
-
-          doc.setFontSize(9);
-          doc.setTextColor(100, 100, 100);
-          doc.text("TOOLS", 142, startY + 7);
-          doc.setFontSize(11);
-          doc.setFont(undefined, "bold");
-          doc.setTextColor(0, 0, 0);
-          doc.text(
-            "Rp " + (data.toolsCost / 1000000).toFixed(1) + "jt",
-            142,
-            startY + 17
-          );
-
-          // Ringkasan Biaya Table
-          doc.setTextColor(0, 0, 0);
-          doc.setFont(undefined, "bold");
-          doc.setFontSize(12);
-          doc.text("Ringkasan Biaya", 14, 135);
-
-          doc.autoTable({
-            startY: 140,
-            head: [["Komponen", "Total"]],
-            body: [
-              [
-                `Biaya Manpower (x ${data.jumlahOrang} orang)`,
-                "Rp " + data.manpowerCost.toLocaleString("id-ID"),
-              ],
-              [
-                "Biaya Operasional",
-                "Rp " + data.operasionalCost.toLocaleString("id-ID"),
-              ],
-              [
-                `Biaya Tools (x ${data.jumlahOrang} orang)`,
-                "Rp " + data.toolsCost.toLocaleString("id-ID"),
-              ],
-            ],
-            theme: "plain",
-            headStyles: {
-              fillColor: [102, 126, 234],
-              textColor: [255, 255, 255],
-              fontStyle: "bold",
-              fontSize: 10,
-            },
-            bodyStyles: {
-              fontSize: 10,
-            },
-            alternateRowStyles: {
-              fillColor: [248, 250, 252],
-            },
-            columnStyles: {
-              0: { cellWidth: 100 },
-              1: { halign: "right", cellWidth: 82 },
-            },
-          });
-
-          // Grand Total Box
-          let finalY = doc.lastAutoTable.finalY + 10;
-          doc.setFillColor(102, 126, 234);
-          doc.roundedRect(14, finalY, 182, 20, 3, 3, "F");
-
-          doc.setTextColor(255, 255, 255);
-          doc.setFontSize(11);
-          doc.setFont(undefined, "normal");
-          doc.text("TOTAL BIAYA PROYEK", 20, finalY + 8);
-
-          doc.setFontSize(16);
-          doc.setFont(undefined, "bold");
-          doc.text(
-            "Rp " + data.total.toLocaleString("id-ID"),
-            190,
-            finalY + 13,
-            { align: "right" }
-          );
-
-          // Breakdown Detail per Tahun
-          if (data.manpowerDetails.length > 0) {
-            finalY += 30;
-            doc.setTextColor(0, 0, 0);
-            doc.setFont(undefined, "bold");
-            doc.setFontSize(12);
-            doc.text("Detail Biaya Manpower per Tahun", 14, finalY);
-
-            const manpowerRows = data.manpowerDetails.map((d) => [
-              `Tahun ${d.year}`,
-              "Rp " + d.gp.toLocaleString("id-ID"),
-              "Rp " + d.asuransi.toLocaleString("id-ID"),
-              "Rp " + d.perf.toLocaleString("id-ID"),
-              "Rp " + d.hp.toLocaleString("id-ID"),
-              "Rp " + d.parkir.toLocaleString("id-ID"),
-              "Rp " + d.bpjs.toLocaleString("id-ID"),
-              "Rp " + d.thr.toLocaleString("id-ID"),
-              "Rp " + d.komp.toLocaleString("id-ID"),
-              "Rp " + d.total.toLocaleString("id-ID"),
-            ]);
-
-            doc.autoTable({
-              startY: finalY + 5,
-              head: [
-                [
-                  "Tahun",
-                  "GP",
-                  "Asuransi",
-                  "Perf",
-                  "HP",
-                  "Parkir",
-                  "BPJS",
-                  "THR",
-                  "Komp",
-                  "Total",
-                ],
-              ],
-              body: manpowerRows,
-              theme: "striped",
-              headStyles: {
-                fillColor: [102, 126, 234],
-                textColor: [255, 255, 255],
-                fontStyle: "bold",
-                fontSize: 8,
-              },
-              bodyStyles: {
-                fontSize: 7,
-              },
-              styles: {
-                cellPadding: 2,
-              },
-            });
-          }
-
-          doc.save("MSO_Manpower_Calculator.pdf");
-
-          // Reset button
-          btn.disabled = false;
-          btn.innerHTML = originalText;
-
-          // Show success toast
-          showToast("✓ File PDF berhasil diexport!");
-        }, 500);
-      }
-    </script>
+    <div id="proServiceModal" class="modal">
+      <div class="modal-content">
+        <span class="modal-close" onclick="closeProServiceModal()">&times;</span>
+        <h2 class="text-2xl font-bold gradient-text mb-6">🔔 Pemberitahuan</h2>
+        <p>Untuk jumlah unit di atas 150, Anda harus menggunakan layanan Manage Service. Silakan beralih ke tab Manage Service.</p>
+        <button onclick="closeProServiceModal()" class="w-full gradient-bg text-white py-3 rounded-xl font-semibold mt-4 hover-lift">
+          Tutup
+        </button>
+      </div>
+    </div>
+<script src="scripts.js"></script>
   </body>
 </html>
