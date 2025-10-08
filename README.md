@@ -30,5 +30,5 @@
 
 1. **Clone Repository**:
    ```bash
-   git clone https://github.com/username/repo-name.git
+   git clone https://github.com/mso-tim/cost-calculator.git
    cd repo-name
